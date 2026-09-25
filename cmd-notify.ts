@@ -1,4 +1,4 @@
-// Mod: notifier — pings you when a turn is over, when the agent needs approval,
+// Mod: cmd-notify — pings you when a turn is over, when the agent needs approval,
 // and when the agent finishes its task. Every ping shows as a TUI notice and as
 // an OS desktop notification (notify-send on Linux, osascript on macOS).
 //
