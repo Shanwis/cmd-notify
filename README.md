@@ -16,7 +16,8 @@ desktop notification (`notify-send` on Linux, `osascript` on macOS).
 | The agent finishes its task | `run_end` with `stopReason: 'end_turn'` | `Task finished after 8 turn(s)` |
 
 Interrupted runs, permission denials, and max-turn cutoffs stay silent — only a
-natural completion counts as "task finished".
+natural completion counts as "task finished". On a natural completion the finish
+notification replaces the final turn's ping, so only one pops.
 
 ## Install
 
@@ -46,6 +47,8 @@ Then start a new session, or run `/reload` in the current one. Verify with
 - No build step: Command Code loads the TypeScript directly via jiti.
 - Desktop notifications are fire-and-forget; if `notify-send` is unavailable the
   TUI notice still renders.
+- Desktop notifications carry the Command Code logo icon from
+  `images/commandcodelogo.png`, which must ship alongside the mod file.
 - `interaction_requested` is emitted on the agent event bus but is not yet in the
   documented `AgentEvent` type union, so the mod subscribes through a loose cast.
 
