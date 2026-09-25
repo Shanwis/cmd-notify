@@ -1,0 +1,12 @@
+{
+	"name": "commandcode-notifier",
+	"version": "0.1.0",
+	"description": "Command Code mod: desktop notifications when a turn is over, when the agent needs approval, and when the agent finishes its task.",
+	"type": "module",
+	"license": "MIT",
+	"keywords": ["commandcode", "mod", "notifications"],
+	"files": ["notifier.ts", "README.md", "LICENSE"],
+	"commandcode": {
+		"mods": ["./notifier.ts"]
+	}
+}
