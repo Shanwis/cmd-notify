@@ -10,27 +10,30 @@ desktop notification (`notify-send` on Linux).
 
 | Moment | Event | Message |
 |---|---|---|
-| A turn is over (each model round) | `turn_end` | `Turn 12 over` |
+| A turn is over (each model round) | `turn_end` | `Turn 12 over — Refactored the auth handler` |
 | The agent requires approval | `interaction_requested` (`kind: 'permission'`) | `Approval needed: write_file` |
 | Plan / approval dialogs | `interaction_requested` (`kind: 'question'`) | `Your input is needed` |
-| The agent finishes its task | `run_end` with `stopReason: 'end_turn'` | `Task finished after 8 turn(s)` |
+| The agent finishes its task | `run_end` with `stopReason: 'end_turn'` | `Task finished after 8 turn(s) — All tests green` |
+| The run stops abnormally (interrupt, denial, cutoff, hook) | `run_end` (other `stopReason`s) | `Run interrupted after 8 turn(s)` |
+| The run fails (network / API) | `run_error` | `Run failed: Connection refused` |
+| The connection stalls in the retry loop | `api_retry` | `Connection trouble — retrying` |
 
-Interrupted runs, permission denials, and max-turn cutoffs stay silent — only a
-natural completion counts as "task finished". On a natural completion the finish
-notification replaces the final turn's ping, so only one pops.
+Every run ending pings, worded by its cause — interruptions, permission denials,
+max-turn cutoffs, hook stops, and network/API failures included. The run-ending
+ping replaces the final turn's ping, so only one pops. Connection stalls ping at
+most once per minute; when retries are exhausted the failure ping reports
+`Run failed: …` instead of the generic stop message.
+
+Turn and finish pings carry a short summary of the turn's output — the
+assistant's text (or its tool calls when it wrote nothing), collapsed to one
+line and capped at 100 characters.
 
 ## Install
 
 From GitHub (user scope):
 
 ```bash
-cmd mods add -g <your-github-user>/cmd-notify
-```
-
-From npm:
-
-```bash
-cmd mods add -g cmd-notify
+cmd mods add -g shanwis/cmd-notify
 ```
 
 From a local checkout (referenced in place — edits apply on `/reload`):
