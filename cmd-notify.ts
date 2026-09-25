@@ -1,7 +1,8 @@
 // Mod: cmd-notify — pings you when a turn is over, when the agent needs approval,
 // and when the agent finishes its task. Every ping shows as a TUI notice and as
-// an OS desktop notification (notify-send on Linux, osascript on macOS). The
-// desktop notification carries the Command Code logo from images/.
+// an OS desktop notification (notify-send on Linux; macOS support is deferred
+// to a later release). The desktop notification carries the Command Code logo
+// from images/.
 //
 // Signal map:
 //   turn_end                 -> each model round finished ("a turn is over")
@@ -34,20 +35,6 @@ function desktopNotify(cmd: ModApi, message: string): void {
 			? ['--icon', ICON_PATH, TITLE, message]
 			: [TITLE, message];
 		cmd.exec({command: 'notify-send', args}).catch(() => {});
-	} else if (process.platform === 'darwin') {
-		const quoted = (text: string) => JSON.stringify(text);
-		const script = (withIcon: boolean) =>
-			`display notification ${quoted(message)} with title ${quoted(TITLE)}` +
-			(withIcon ? ` with icon POSIX file ${quoted(ICON_PATH)}` : '');
-		const send = (source: string) =>
-			cmd.exec({command: 'osascript', args: ['-e', source]});
-		if (hasIcon) {
-			send(script(true)).catch(() => {
-				send(script(false)).catch(() => {});
-			});
-		} else {
-			send(script(false)).catch(() => {});
-		}
 	}
 }
 

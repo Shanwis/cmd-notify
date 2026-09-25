@@ -4,7 +4,7 @@ A [Command Code](https://commandcode.ai) mod that pings you when the agent needs
 you — so you can look away from the terminal during long runs.
 
 Every notification is delivered twice: a notice row in the TUI feed and an OS
-desktop notification (`notify-send` on Linux, `osascript` on macOS).
+desktop notification (`notify-send` on Linux).
 
 ## What notifies
 
@@ -45,6 +45,8 @@ Then start a new session, or run `/reload` in the current one. Verify with
 ## Notes
 
 - No build step: Command Code loads the TypeScript directly via jiti.
+- Desktop notifications are Linux-only for now; macOS support is planned for a
+  later release.
 - Desktop notifications are fire-and-forget; if `notify-send` is unavailable the
   TUI notice still renders.
 - Desktop notifications carry the Command Code logo icon from
