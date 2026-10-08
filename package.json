@@ -4,6 +4,14 @@
 	"description": "Command Code mod: desktop notifications when a turn is over, when the agent needs approval, and when the agent finishes its task.",
 	"type": "module",
 	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Shanwis/cmd-notify.git"
+	},
+	"bugs": {
+		"url": "https://github.com/Shanwis/cmd-notify/issues"
+	},
+	"homepage": "https://github.com/Shanwis/cmd-notify",
 	"keywords": ["commandcode", "mod", "notifications"],
 	"files": ["cmd-notify.ts", "images", "README.md", "LICENSE"],
 	"commandcode": {
