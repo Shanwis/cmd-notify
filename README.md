@@ -36,6 +36,12 @@ From GitHub (user scope):
 cmd mods add -g shanwis/cmd-notify
 ```
 
+From npm (user scope):
+
+```bash
+cmd mods add -g npm:cmd-notify
+```
+
 From a local checkout (referenced in place — edits apply on `/reload`):
 
 ```bash
