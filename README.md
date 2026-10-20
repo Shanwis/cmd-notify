@@ -60,6 +60,8 @@ Then start a new session, or run `/reload` in the current one. Verify with
   TUI notice still renders.
 - Desktop notifications carry the Command Code logo icon from
   `images/commandcodelogo.png`, which must ship alongside the mod file.
+- Desktop notifications are titled with the session name, falling back to the
+  workspace directory name when no session name is set.
 - `interaction_requested` is emitted on the agent event bus but is not yet in the
   documented `AgentEvent` type union, so the mod subscribes through a loose cast.
 

@@ -20,10 +20,16 @@
 //   api_retry                 -> connection trouble, at most one ping per minute
 
 import {existsSync} from 'node:fs';
+import {basename} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import type {ModApi} from '@commandcode/harness';
 
-const TITLE = 'Command Code';
+// The notification title is the session name — falling back to the workspace
+// directory name (usually one session per directory), then "Command Code".
+function notifyTitle(cmd: ModApi): string {
+	return cmd.getSessionName() || basename(cmd.cwd) || 'Command Code';
+}
+
 const ICON_PATH = fileURLToPath(
 	new URL('./images/commandcodelogo.png', import.meta.url),
 );
@@ -38,9 +44,10 @@ type LooseOn = (
 
 function desktopNotify(cmd: ModApi, message: string): void {
 	if (process.platform === 'linux') {
+		const title = notifyTitle(cmd);
 		const args = hasIcon
-			? ['--icon', ICON_PATH, TITLE, message]
-			: [TITLE, message];
+			? ['--icon', ICON_PATH, title, message]
+			: [title, message];
 		cmd.exec({command: 'notify-send', args}).catch(() => {});
 	}
 }
