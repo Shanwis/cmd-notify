@@ -18,6 +18,10 @@
 //                             abnormally; unknown reasons get a generic line
 //   run_error                 -> non-retryable failure (network/API): "Run failed"
 //   api_retry                 -> connection trouble, at most one ping per minute
+//
+// The pings that matter most also play a sound: an attention tone when the agent
+// is waiting on the user, a completion tone when the task finishes. Sounds are on
+// by default and can be toggled with /notify-sound, persisted in the mod store.
 
 import {existsSync} from 'node:fs';
 import {basename} from 'node:path';
@@ -55,6 +59,19 @@ function desktopNotify(cmd: ModApi, message: string): void {
 function notify(cmd: ModApi, message: string): void {
 	cmd.ui.notify(message);
 	desktopNotify(cmd, message);
+}
+
+// Sound is a side effect: fire-and-forget, and playback failures are silent.
+// The WAVs ship in sounds/ next to the mod file (relative paths resolve against
+// the mod's own directory). WAV plays everywhere, including Windows and
+// ALSA-only Linux. Enabled unless the user turned it off with /notify-sound.
+function soundEnabled(cmd: ModApi): boolean {
+	return cmd.store.get<boolean>('sound') !== false;
+}
+
+function playSound(cmd: ModApi, kind: 'attention' | 'complete'): void {
+	if (!soundEnabled(cmd)) return;
+	void cmd.audio.play({file: `./sounds/${kind}.wav`});
 }
 
 // A natural finish fires turn_end for the final turn right before the run ends,
@@ -151,12 +168,15 @@ let turnOutput: unknown;
 // run-ending one.
 let runPinged = false;
 
-function finishRun(cmd: ModApi, message: string): void {
+function finishRun(cmd: ModApi, message: string, finished: boolean): void {
 	dropTurnNotice();
 	droppedTurn = undefined;
 	if (runPinged) return;
 	runPinged = true;
 	notify(cmd, message);
+	// Only a natural finish ("task complete") sounds; failures and abnormal
+	// stops stay silent.
+	if (finished) playSound(cmd, 'complete');
 }
 
 // api_retry can fire repeatedly while the connection is down - one ping per
@@ -165,6 +185,24 @@ const RETRY_PING_INTERVAL_MS = 60_000;
 let lastRetryPingAt = 0;
 
 export default function (cmd: ModApi): void {
+	cmd.addCommand({
+		name: 'notify-sound',
+		description:
+			'Toggle the notification sounds: /notify-sound [on|off|status]',
+		argumentHint: '[on|off|status]',
+		handler: async ({args}) => {
+			const arg = args.trim().toLowerCase();
+			const current = soundEnabled(cmd);
+			let next = current;
+			if (arg === '') next = !current;
+			else if (arg === 'on') next = true;
+			else if (arg === 'off') next = false;
+			// 'status' and unrecognized values just report the current state.
+			if (next !== current) await cmd.store.set('sound', next);
+			return {message: next ? 'Sound on' : 'Sound off'};
+		},
+	});
+
 	cmd.on('message_end', event => {
 		if (event.type !== 'message_end') return;
 		turnOutput = event.content;
@@ -198,7 +236,10 @@ export default function (cmd: ModApi): void {
 			notify(cmd, `Approval needed: ${event.toolName}`);
 		} else if (event.kind === 'question') {
 			notify(cmd, 'Your input is needed');
+		} else {
+			return;
 		}
+		playSound(cmd, 'attention');
 	});
 
 	cmd.on('run_start', event => {
@@ -216,7 +257,7 @@ export default function (cmd: ModApi): void {
 				? error
 				: ((error as {message?: string} | undefined)?.message ??
 					'unknown error');
-		finishRun(cmd, `Run failed: ${text.split('\n')[0].slice(0, 120)}`);
+		finishRun(cmd, `Run failed: ${text.split('\n')[0].slice(0, 120)}`, false);
 	});
 
 	cmd.on('api_retry', event => {
@@ -232,6 +273,10 @@ export default function (cmd: ModApi): void {
 		const {result} = event;
 		const message = endMessage(result.stopReason, result.turnCount);
 		const summary = summarize(result.finalText);
-		finishRun(cmd, summary ? `${message} — ${summary}` : message);
+		finishRun(
+			cmd,
+			summary ? `${message} — ${summary}` : message,
+			result.stopReason === 'end_turn',
+		);
 	});
 }

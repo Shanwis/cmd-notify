@@ -1,7 +1,7 @@
 {
 	"name": "cmd-notify",
 	"version": "0.1.1",
-	"description": "Command Code mod: desktop notifications when a turn is over, when the agent needs approval, and when the agent finishes its task.",
+	"description": "Command Code mod: desktop notifications and sounds when a turn is over, when the agent needs approval, and when the agent finishes its task.",
 	"type": "module",
 	"license": "MIT",
 	"repository": {
@@ -15,11 +15,13 @@
 	"keywords": [
 		"commandcode",
 		"mod",
-		"notifications"
+		"notifications",
+		"sound"
 	],
 	"files": [
 		"cmd-notify.ts",
 		"images",
+		"sounds",
 		"README.md",
 		"LICENSE"
 	],
